@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} - ContactForm
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+{% endblock %}
+
+{% block body %}
+Contact Form:
+    {{ form_start(contactForm) }}
+
+        {{ form_label(contactForm.name) }}
+        {{ form_errors(contactForm.name) }}
+        {{ form_widget(contactForm.name) }}
+
+        {{ form_row(contactForm.courriel) }}
+
+        {{ form_row(contactForm.message) }}
+    <button class='btn btn-info' type="submit">Envoyer</button>
+    {{ form_end(contactForm) }}
+{% endblock %}
