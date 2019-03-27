@@ -9,8 +9,12 @@
 namespace App\Controller;
 
 
-use App\Form\ContactType;
-use App\Model\Contact;
+use App\Contact\Service\ContactFormAvailableService;
+use App\Contact\Exception\MinuteIsEvenException;
+use App\Contact\Exception\RandomIsBelowFiveException;
+use App\Contact\Form\ContactType;
+use App\General\Exception\NetworkUnavailableException;
+use App\Contact\Model\Contact;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -33,12 +37,21 @@ class ContactController
      * @var RouterInterface
      */
     private $router;
+    /**
+     * @var ContactFormAvailableService
+     */
+    private $contactFormAvailableService;
 
-    public function __construct(EngineInterface $templating, FormFactoryInterface $formFactory, RouterInterface $router)
-    {
+    public function __construct(
+        EngineInterface $templating,
+        FormFactoryInterface $formFactory,
+        RouterInterface $router,
+        ContactFormAvailableService $contactFormAvailableService
+    ) {
         $this->templating = $templating;
         $this->formFactory = $formFactory;
         $this->router = $router;
+        $this->contactFormAvailableService = $contactFormAvailableService;
     }
 
     /**
@@ -46,6 +59,22 @@ class ContactController
      */
     public function newContact(Request $request): Response
     {
+
+        $message = '';
+        try {
+            $this->contactFormAvailableService->shouldBeAvailable();
+        } catch( RandomIsBelowFiveException $exception ){
+            $templateName = 'contact/disabled_by_random.html.twig';
+        } catch( MinuteIsEvenException $exception ){
+            $templateName = 'contact/disabled_by_even_minutes.html.twig';
+        } catch( NetworkUnavailableException $exception ){
+            $templateName = 'contact/disabled_by_network.html.twig';
+        } finally {
+            if(isset($templateName)) {
+              return new Response($this->templating->render($templateName,array('exception' => $exception)));
+            }
+        }
+
         $contact = new Contact();
         $contactForm = $this->formFactory->create(ContactType::class,$contact);
         $contactForm->handleRequest($request);

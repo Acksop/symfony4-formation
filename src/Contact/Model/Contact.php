@@ -6,7 +6,7 @@
  * Time: 2:14 PM
  */
 
-namespace App\Model;
+namespace App\Contact\Model;
 
 
 use DateTime;

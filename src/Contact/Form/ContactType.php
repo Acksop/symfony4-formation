@@ -6,7 +6,7 @@
  * Time: 2:29 PM
  */
 
-namespace App\Form;
+namespace App\Contact\Form;
 
 
 use Symfony\Component\Form\AbstractType;
